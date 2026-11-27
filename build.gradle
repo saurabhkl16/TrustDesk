@@ -33,6 +33,14 @@ dependencies {
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+	// Spring AI BOM - compatible with Spring Boot 4.2.x
+	implementation platform("org.springframework.ai:spring-ai-bom:2.1.0")
+
+// Spring AI - PGVector
+	implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+
+// Spring AI - Ollama Embedding Model
+	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 }
 
 tasks.named('test') {
