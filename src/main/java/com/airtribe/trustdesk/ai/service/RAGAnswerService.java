@@ -37,10 +37,12 @@ public class RAGAnswerService {
 
         if (documents.isEmpty()) {
             return new RAGAnswerResponse(
-                    "not_found",
-                    "I could not find relevant information in the Knowledge Base. This query requires human support.",
+                    "escalation_required",
+                    "I could not find relevant information in the Knowledge Base. A human support agent is required to review your request.",
                     List.of(),
-                    0
+                    0,
+                    true,
+                    "NO_RELEVANT_KNOWLEDGE_FOUND"
             );
         }
 
@@ -122,7 +124,9 @@ public class RAGAnswerService {
                 "success",
                 answer,
                 validatedCitations,
-                documents.size()
+                documents.size(),
+                false,
+                null
         );
     }
 
