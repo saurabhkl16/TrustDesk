@@ -41,6 +41,8 @@ dependencies {
 
 // Spring AI - Ollama Embedding Model
 	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
