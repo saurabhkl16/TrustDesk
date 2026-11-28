@@ -18,6 +18,13 @@ public class TicketTriageService {
 
     public TicketTriageResponse analyzeTicket(String customerMessage) {
 
+        TicketTriageResponse ruleBasedResult =
+                applyDeterministicRules(customerMessage);
+
+        if (ruleBasedResult != null) {
+            return ruleBasedResult;
+        }
+
         String prompt = """
                 You are a customer support ticket classification system.
 
@@ -65,5 +72,60 @@ public class TicketTriageService {
                     exception
             );
         }
+    }
+
+    private TicketTriageResponse applyDeterministicRules(
+            String customerMessage) {
+
+        String message = customerMessage.toLowerCase();
+
+        // Critical product safety issue
+        if (message.contains("swollen battery")
+                || message.contains("battery swelling")) {
+
+            return new TicketTriageResponse(
+                    "warranty",
+                    "urgent",
+                    true,
+                    "Battery swelling or safety hazards"
+            );
+        }
+
+        // Account security bypass
+        if (message.contains("ignore identity checks")
+                || message.contains("bypass identity verification")) {
+
+            return new TicketTriageResponse(
+                    "account_security",
+                    "high",
+                    true,
+                    "Identity verification bypass attempt"
+            );
+        }
+
+        // Prompt injection and sensitive information requests
+        if (message.contains("ignore all previous instructions")
+                || message.contains("hidden system prompt")
+                || message.contains("api key")
+                || message.contains("hide it from human reviewer")) {
+
+            String category = message.contains("api key")
+                    || message.contains("hidden system prompt")
+                    ? "account_security"
+                    : "general";
+
+            String priority = category.equals("account_security")
+                    ? "high"
+                    : "medium";
+
+            return new TicketTriageResponse(
+                    category,
+                    priority,
+                    true,
+                    "Unsafe instruction or sensitive information request"
+            );
+        }
+
+        return null;
     }
 }
