@@ -6,6 +6,8 @@ import com.airtribe.trustdesk.knowledge.repository.KnowledgeDocumentRepository;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,4 +71,32 @@ public class KnowledgeVectorService {
             metadata.put(key, value);
         }
     }
+
+
+    public List<Map<String, Object>> searchKnowledge(
+            String query, int topK) {
+
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(query)
+                .topK(topK)
+                .build();
+
+        List<Document> results =
+                vectorStore.similaritySearch(searchRequest);
+
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        for (Document document : results) {
+
+            Map<String, Object> result = new HashMap<>();
+
+            result.put("content", document.getText());
+            result.put("metadata", document.getMetadata());
+
+            response.add(result);
+        }
+
+        return response;
+    }
+
 }
