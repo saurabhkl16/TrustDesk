@@ -107,3 +107,11 @@ Never commit database passwords, API keys, JWT secrets, or other credentials to 
 ## License
 
 To be decided.
+
+
+## Imp Words
+1. Retrieval (रिट्रीवल) – Knowledge Base में से सवाल से संबंधित जानकारी या documents खोजना।
+
+2. Grounding (ग्राउंडिंग) – AI का जवाब retrieved documents में मौजूद वास्तविक जानकारी पर आधारित रखना, ताकि AI अपनी तरफ से गलत जानकारी न बनाए।
+
+3. Guardrails (गार्डरेल्स) – AI को unsafe काम करने, गलत instructions follow करने या company policies bypass करने से रोकने के लिए सुरक्षा नियम लगाना।

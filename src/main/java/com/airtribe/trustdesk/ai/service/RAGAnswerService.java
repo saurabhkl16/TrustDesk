@@ -53,6 +53,32 @@ public class RAGAnswerService {
                         question, topK
                 );
 
+
+        for (Map<String, Object> document : documents) {
+
+            Object contentObject = document.get("content");
+
+            String content = contentObject != null
+                    ? String.valueOf(contentObject)
+                    : "";
+
+            String contextSafetyReason =
+                    safetyGuardrailService.detectUnsafeRetrievedContent(content);
+
+            if (contextSafetyReason != null) {
+
+                return new RAGAnswerResponse(
+                        "escalation_required",
+                        "A potentially unsafe instruction was detected in the Knowledge Base. Your request requires human review.",
+                        List.of(),
+                        documents.size(),
+                        true,
+                        contextSafetyReason
+                );
+            }
+        }
+
+
         if (documents.isEmpty()) {
             return new RAGAnswerResponse(
                     "escalation_required",
