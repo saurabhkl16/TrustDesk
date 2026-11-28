@@ -161,6 +161,24 @@ public class RAGAnswerService {
                 .call()
                 .content();
 
+        String groundingResult = validateGrounding(
+                question,
+                answer,
+                context.toString()
+        );
+
+        if (!"SUPPORTED".equals(groundingResult)) {
+
+            return new RAGAnswerResponse(
+                    "escalation_required",
+                    "I could not verify that the generated answer is fully supported by our Knowledge Base. A human support agent is required to review it.",
+                    List.of(),
+                    documents.size(),
+                    true,
+                    "UNSUPPORTED_ANSWER_CONTENT"
+            );
+        }
+
         List<String> validatedCitations =
                 validateCitations(answer, citations);
 
@@ -196,5 +214,92 @@ public class RAGAnswerService {
         }
 
         return new ArrayList<>(validCitations);
+    }
+
+    private String validateGrounding(String question,
+                                     String answer,
+                                     String knowledgeContext) {
+
+        String verificationPrompt = """
+        You are a strict but fair answer grounding validator.
+        
+        IMPORTANT:
+        Do not reject an answer just because it contains
+        additional details from other sections of the same
+        provided knowledge base context.
+        
+        Evaluate every factual claim against the entire context.
+
+        Your task is to verify whether the generated answer
+        is supported by the provided knowledge base context.
+
+        IMPORTANT RULES:
+
+        1. Check every factual claim in the answer.
+
+        2. Accept exact statements and semantically equivalent
+           paraphrases when their meaning is supported by context.
+
+        3. A claim explicitly stated in the knowledge base
+           MUST be considered SUPPORTED.
+
+        4. Do not mark a claim unsupported merely because
+           the answer uses different wording.
+
+        5. If the answer contradicts the knowledge base,
+           return UNSUPPORTED.
+
+        6. If the answer introduces factual information
+           not present or reasonably supported by context,
+           return UNSUPPORTED.
+
+        7. Do not use external knowledge.
+
+        8. If all factual claims are supported, return SUPPORTED.
+
+        Example:
+        Knowledge: "Does not cover normal wear."
+        Answer: "Excludes normal wear."
+        Result: SUPPORTED.
+
+        Return ONLY one word:
+        SUPPORTED or UNSUPPORTED.
+
+        Knowledge Base Context:
+        %s
+
+        Customer Question:
+        %s
+
+        Generated Answer:
+        %s
+        """.formatted(knowledgeContext, question, answer);
+
+        try {
+            String result = chatClient.prompt()
+                    .user(verificationPrompt)
+                    .call()
+                    .content();
+
+            if (result == null) {
+                return "UNSUPPORTED";
+            }
+
+            String normalizedResult = result.trim()
+                    .toUpperCase();
+
+            if (normalizedResult.contains("UNSUPPORTED")) {
+                return "UNSUPPORTED";
+            }
+
+            if (normalizedResult.contains("SUPPORTED")) {
+                return "SUPPORTED";
+            }
+
+            return "UNSUPPORTED";
+
+        } catch (Exception exception) {
+            return "UNSUPPORTED";
+        }
     }
 }

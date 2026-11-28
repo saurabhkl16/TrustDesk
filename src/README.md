@@ -6,6 +6,17 @@ An AI-powered customer support operations platform built using Java 21 and Sprin
 
 TrustDesk helps support agents analyze customer tickets, retrieve company policies, generate AI-powered responses with citations, and recommend actions with human approval.
 
+## Flow:
+1. Customer question
+2. Input Guardrail
+3. Knowledge Base Retrieval
+4. Retrieved Document Guardrail
+5. AI Answer Generation
+6. Citation Validation
+7. Grounding Validation
+8. Final Response या Human Escalation
+
+
 ## Tech Stack
 
 - Java 21
@@ -111,7 +122,10 @@ To be decided.
 
 ## Imp Words
 1. Retrieval (रिट्रीवल) – Knowledge Base में से सवाल से संबंधित जानकारी या documents खोजना।
-
 2. Grounding (ग्राउंडिंग) – AI का जवाब retrieved documents में मौजूद वास्तविक जानकारी पर आधारित रखना, ताकि AI अपनी तरफ से गलत जानकारी न बनाए।
-
 3. Guardrails (गार्डरेल्स) – AI को unsafe काम करने, गलत instructions follow करने या company policies bypass करने से रोकने के लिए सुरक्षा नियम लगाना।
+
+## Security Layers:
+1. Input Guardrail – Prompt injection detection.
+2. Retrieved Document Guardrail – Malicious KB content detection.
+3. Answer Grounding Validation – Unsupported AI claims detection.
