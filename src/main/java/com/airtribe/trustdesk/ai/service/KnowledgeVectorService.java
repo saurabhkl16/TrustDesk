@@ -79,6 +79,7 @@ public class KnowledgeVectorService {
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(query)
                 .topK(topK)
+                .similarityThreshold(0.65)
                 .build();
 
         List<Document> results =
