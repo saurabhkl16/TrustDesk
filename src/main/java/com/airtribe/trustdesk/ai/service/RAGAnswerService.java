@@ -4,6 +4,7 @@ package com.airtribe.trustdesk.ai.service;
 import com.airtribe.trustdesk.ai.dto.RAGAnswerResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,17 +19,34 @@ public class RAGAnswerService {
 
     private final ChatClient chatClient;
     private final KnowledgeVectorService knowledgeVectorService;
+    private final SafetyGuardrailService safetyGuardrailService;
 
     public RAGAnswerService(
             ChatClient.Builder chatClientBuilder,
-            KnowledgeVectorService knowledgeVectorService) {
+            KnowledgeVectorService knowledgeVectorService,
+            SafetyGuardrailService safetyGuardrailService) {
 
         this.chatClient = chatClientBuilder.build();
         this.knowledgeVectorService = knowledgeVectorService;
+        this.safetyGuardrailService = safetyGuardrailService;
     }
 
     public RAGAnswerResponse generateAnswer(
             String question, int topK) {
+
+        String safetyReason =
+                safetyGuardrailService.detectUnsafeRequest(question);
+
+        if (safetyReason != null) {
+            return new RAGAnswerResponse(
+                    "escalation_required",
+                    "I cannot assist with bypassing company policies or revealing internal instructions. Your request requires human review.",
+                    List.of(),
+                    0,
+                    true,
+                    safetyReason
+            );
+        }
 
         List<Map<String, Object>> documents =
                 knowledgeVectorService.searchKnowledge(
